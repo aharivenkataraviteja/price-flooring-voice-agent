@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Flooring — Lead Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #333; }
+  header { background: #1a3a5c; color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header span { font-size: 13px; opacity: 0.8; }
+  .stats { display: flex; gap: 16px; padding: 20px 24px; flex-wrap: wrap; }
+  .stat { background: white; border-radius: 8px; padding: 16px 20px; flex: 1; min-width: 140px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .stat .num { font-size: 28px; font-weight: 700; color: #1a3a5c; }
+  .stat .label { font-size: 12px; color: #666; margin-top: 4px; }
+  .table-wrap { padding: 0 24px 40px; }
+  table { width: 100%; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.1); border-collapse: collapse; overflow: hidden; }
+  th { background: #1a3a5c; color: white; text-align: left; padding: 12px 14px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-new { background: #dbeafe; color: #1e40af; }
+  .badge-appointment_set { background: #d1fae5; color: #065f46; }
+  .badge-quoted { background: #fef3c7; color: #92400e; }
+  .badge-won { background: #d1fae5; color: #065f46; }
+  .badge-lost { background: #fee2e2; color: #991b1b; }
+  .badge-transferred { background: #ede9fe; color: #5b21b6; }
+  .empty { text-align: center; padding: 60px; color: #999; }
+  .refresh { font-size: 12px; cursor: pointer; background: rgba(255,255,255,.2); border: none; color: white; padding: 5px 10px; border-radius: 4px; }
+  .refresh:hover { background: rgba(255,255,255,.3); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Price Flooring — Lead Dashboard</h1>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="lastRefresh">Loading…</span>
+    <button class="refresh" onclick="loadLeads()">Refresh</button>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="num" id="statTotal">—</div><div class="label">Total Leads</div></div>
+  <div class="stat"><div class="num" id="statNew">—</div><div class="label">New (Uncontacted)</div></div>
+  <div class="stat"><div class="num" id="statAppt">—</div><div class="label">Appointments Set</div></div>
+  <div class="stat"><div class="num" id="statToday">—</div><div class="label">Today</div></div>
+</div>
+
+<div class="table-wrap">
+  <table id="leadTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Project</th>
+        <th>Material</th>
+        <th>Rooms / Sqft</th>
+        <th>Timeline</th>
+        <th>Appointment</th>
+        <th>Status</th>
+        <th>Captured</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"><tr><td colspan="10" class="empty">Loading leads…</td></tr></tbody>
+  </table>
+</div>
+
+<script>
+function fmt(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt.replace(' ', 'T') + 'Z');
+  return d.toLocaleDateString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+}
+
+async function loadLeads() {
+  const res = await fetch('/api/leads');
+  const leads = await res.json();
+  const today = new Date().toISOString().slice(0,10);
+
+  document.getElementById('statTotal').textContent = leads.length;
+  document.getElementById('statNew').textContent = leads.filter(l => l.status === 'new').length;
+  document.getElementById('statAppt').textContent = leads.filter(l => l.status === 'appointment_set').length;
+  document.getElementById('statToday').textContent = leads.filter(l => l.created_at && l.created_at.startsWith(today)).length;
+  document.getElementById('lastRefresh').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+  const tbody = document.getElementById('tbody');
+  if (!leads.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">No leads yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = leads.map(l => {
+    const appt = (l.scheduled_date && l.scheduled_time)
+      ? `${l.scheduled_date}<br><small>${l.scheduled_time}</small>`
+      : (l.preferred_callback ? `Callback: ${l.preferred_callback}` : '—');
+    const conf = l.confirmation_num ? `<br><small style="color:#666">${l.confirmation_num}</small>` : '';
+    const sqft = l.approximate_sqft ? `${l.approximate_sqft} sqft` : '';
+    const rooms = [l.rooms_involved, sqft].filter(Boolean).join(' / ') || '—';
+    return `<tr>
+      <td>${l.id}</td>
+      <td><strong>${l.customer_name || '—'}</strong>${l.email ? '<br><small style="color:#666">'+l.email+'</small>' : ''}</td>
+      <td>${l.phone_number || '—'}</td>
+      <td>${l.project_type || '—'}</td>
+      <td>${l.flooring_interest || '—'}</td>
+      <td>${rooms}</td>
+      <td>${l.timeline || '—'}</td>
+      <td>${appt}${conf}</td>
+      <td><span class="badge badge-${l.status || 'new'}">${l.status || 'new'}</span></td>
+      <td>${fmt(l.created_at)}</td>
+    </tr>`;
+  }).join('');
+}
+
+loadLeads();
+setInterval(loadLeads, 30000);
+</script>
+</body>
+</html>

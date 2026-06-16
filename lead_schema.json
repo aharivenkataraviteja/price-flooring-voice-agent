@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PriceFlooring_Lead",
+  "description": "Structured lead data captured by the Price Flooring voice agent",
+  "type": "object",
+  "required": ["phone_number", "customer_name"],
+  "properties": {
+    "phone_number": {
+      "type": "string",
+      "description": "10-digit phone number, digits only",
+      "pattern": "^[0-9]{10}$"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Full name as provided by caller"
+    },
+    "email": {
+      "type": ["string", "null"],
+      "format": "email"
+    },
+    "property_address": {
+      "type": ["string", "null"],
+      "description": "Address where the work will be performed"
+    },
+    "project_type": {
+      "type": ["string", "null"],
+      "enum": [
+        "hardwood installation",
+        "carpet installation",
+        "LVP installation",
+        "tile installation",
+        "laminate installation",
+        "hardwood refinishing",
+        "carpet binding",
+        "custom rug",
+        "stair runner",
+        "area rug",
+        "kitchen remodel",
+        "bathroom remodel",
+        "design consultation",
+        "product question",
+        "other",
+        null
+      ]
+    },
+    "flooring_interest": {
+      "type": ["string", "null"],
+      "description": "Specific material or product the caller mentioned"
+    },
+    "rooms_involved": {
+      "type": ["string", "null"],
+      "description": "Rooms the project covers, e.g. 'living room and hallway'"
+    },
+    "approximate_sqft": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "residential_or_commercial": {
+      "type": ["string", "null"],
+      "enum": ["residential", "commercial", null]
+    },
+    "material_only_or_install": {
+      "type": ["string", "null"],
+      "enum": ["material only", "installation", "unsure", null]
+    },
+    "timeline": {
+      "type": ["string", "null"],
+      "description": "e.g. ASAP, 2-4 weeks, 1-2 months, just exploring"
+    },
+    "budget_range": {
+      "type": ["string", "null"],
+      "description": "Caller-stated budget if provided, e.g. $3,000-$5,000"
+    },
+    "preferred_callback": {
+      "type": ["string", "null"],
+      "description": "Preferred time for callback, e.g. 'mornings', 'Tuesday afternoon'"
+    },
+    "appointment": {
+      "type": ["object", "null"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["estimate", "consultation", "design"]
+        },
+        "scheduled_date": {"type": ["string", "null"]},
+        "scheduled_time": {"type": ["string", "null"]},
+        "confirmation_number": {"type": ["string", "null"]},
+        "assigned_to": {"type": ["string", "null"]}
+      }
+    },
+    "transfer_requested": {
+      "type": "boolean",
+      "description": "True if call was transferred to human staff"
+    },
+    "after_hours": {
+      "type": "boolean",
+      "description": "True if lead was captured outside business hours"
+    },
+    "notes": {
+      "type": ["string", "null"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["new", "appointment_set", "quoted", "won", "lost", "transferred"],
+      "default": "new"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
