@@ -12,13 +12,13 @@ if [ -z "$VAPI_KEY" ] || [ -z "$ASSISTANT_ID" ]; then
 fi
 
 # ── Replace these with real IDs from register_vapi_tools.sh output ────────────
-TOOL_ID_1="REPLACE_lookup_customer_by_phone"
-TOOL_ID_2="REPLACE_save_customer"
-TOOL_ID_3="REPLACE_create_lead"
-TOOL_ID_4="REPLACE_add_lead_details"
-TOOL_ID_5="REPLACE_get_available_slots"
-TOOL_ID_6="REPLACE_confirm_appointment"
-TOOL_ID_7="REPLACE_check_store_status"
+TOOL_ID_1="7a850875-c774-467e-88cc-5c79168dc6f0"
+TOOL_ID_2="f4f4e28b-e50c-4edf-8b71-4fa8cc0d056a"
+TOOL_ID_3="af73417c-b5ed-4323-98a0-2e440b1ccfb9"
+TOOL_ID_4="122d934c-f959-4433-8db9-13bed1c40c37"
+TOOL_ID_5="e23ce31c-6060-4443-89a5-69edd530fe15"
+TOOL_ID_6="41495de3-5172-4b93-b9bb-ef86f151e092"
+TOOL_ID_7="936ff9a2-664a-479e-aa27-c0ff6effb2be"
 # ─────────────────────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT=$(cat vapi_system_prompt.txt)
